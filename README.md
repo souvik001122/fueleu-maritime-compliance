@@ -1,167 +1,139 @@
 # Fuel EU Compliance Dashboard
 
-A full-stack web application that calculates and manages **Fuel EU compliance metrics** for ships based on greenhouse gas (GHG) intensity and energy consumption.  
-It supports:
-
-- ✅ Compliance Balance (CB) calculation per ship and year  
-- ✅ Banking of surplus CB for future usage  
-- ✅ Pooling between ships to balance deficits with surpluses  
-- ✅ Persistent storage using Neon PostgreSQL + Prisma ORM  
+The Fuel EU Compliance Dashboard is a full-stack web platform that helps maritime operators track and manage greenhouse gas (GHG) intensity under FuelEU regulations. It calculates Compliance Balance (CB) values, supports storing surpluses for future use, and enables pooling between ships to offset deficits. The system integrates a modern PostgreSQL backend with a modular architecture for high scalability and flexibility.
 
 ---
 
 ## 🔍 Overview
 
-The **Fuel EU Compliance Dashboard** enables monitoring of maritime vessel emissions against the target GHG intensity mandated by the FuelEU regulation.
+This project provides an end-to-end solution for evaluating ships' emission performance, comparing it against FuelEU targets, and managing surplus or deficit compliance credits. It features automated calculations, persistent data storage, and an intuitive frontend interface for ship managers.
 
-The platform provides:
-
-| Module | Purpose |
-|--------|---------|
-| **Compliance Calculation** | Computes CB (surplus/deficit) per ship per year |
-| **Banking** | Stores surplus CB for later usage |
-| **Pooling** | Allows multiple ships to redistribute surplus CB |
-| **Database-backed Storage** | Fully persistent via Neon PostgreSQL and Prisma |
+### Main Features
+- Automated Compliance Balance (CB) calculation
+- Banking system to store surplus CB
+- Pooling system to offset deficits across vessels
+- PostgreSQL + Prisma ORM backend
+- Modular architecture following the Hexagonal pattern
 
 ---
 
-## 🧠 Core Compliance Formulas
+## ⚙️ Core Formulae
 
-| Metric | Formula |
-|--------|---------|
-| **Target GHG Intensity (2025)** | `89.3368 gCO₂e / MJ` |
-| **Energy in Scope (MJ)** | `fuelConsumption × 41,000` |
-| **Compliance Balance (CB)** | `(Target − ActualIntensity) × EnergyInScope` |
-| **Interpretation** | Positive CB → Surplus, Negative CB → Deficit |
+| Concept | Formula |
+|----------|----------|
+| Target Intensity (2025) | 89.3368 gCO₂e / MJ |
+| Energy in Scope (MJ) | fuelConsumption × 41,000 |
+| Compliance Balance (CB) | (TargetIntensity − ActualIntensity) × EnergyInScope |
+| Meaning | Positive CB → Surplus, Negative CB → Deficit |
 
 ---
 
-## 🏗️ Architecture Summary (Hexagonal)
+## 🏗️ Architecture Summary
 
-This project follows **Hexagonal Architecture (Ports & Adapters)** for modularity, testability, and decoupled logic.
+This application follows Hexagonal Architecture (Ports and Adapters), enabling a clean separation between core business logic and framework-specific components.
 
-| Layer | Responsibility | Example Components |
-|--------|---------------|--------------------|
-| **Core Domain** | Business entities + invariants | `Route`, `Compliance` |
-| **Application Layer** | Use cases & business workflows | `ComplianceService`, `PoolService` |
-| **Ports (Interfaces)** | Defines boundary contracts | `ComplianceRepositoryPort` |
-| **Adapters (Implementations)** | Connects ports to DB, HTTP, UI | `CompliancePostgresAdapter` |
-| **Infrastructure** | Server, DB connection, framework config | `Express`, `Prisma`, `TSX` |
+| Layer | Description | Examples |
+|--------|--------------|-----------|
+| Domain Core | Defines entities, invariants, and business rules | Compliance, Route |
+| Application Layer | Manages workflows and service logic | ComplianceService, PoolService |
+| Ports | Define boundary interfaces | ComplianceRepositoryPort |
+| Adapters | Implement ports and connect to frameworks | PrismaAdapter, ExpressAPI |
+| Infrastructure | Environment, server, and DB configuration | Express, Prisma, NeonDB |
 
-✅ Benefits: Loose coupling, replaceable adapters, testable core logic, framework-independent domain.
+**Advantages**
+- High modularity and maintainability  
+- Business logic independent of framework or database  
+- Easy to test and extend  
+
+---
 
 ## 🚀 Backend Setup
 
-### 1. Clone the Repository
-```sh
+### 1. Clone Repository
+```bash
 git clone https://github.com/<your-username>/fuel-eu-maritime-compliance.git
 cd fuel-eu-maritime-compliance/backend
-```
-
-### 2.Install Dependencies
-```sh
+2. Install Dependencies
+bash
+Copy code
 npm install
-```
+3. Configure Environment
+Create a .env file in the /backend directory:
 
-### 3.Configure Environment Variables
-   Create a .env file inside /backend:
-```sh
+bash
+Copy code
 DATABASE_URL="postgresql://<user>:<password>@<neon-host>/<db>?sslmode=require"
-```
-### 4.Apply Database Schema
-
-```sh
+4. Initialize Database
+bash
+Copy code
 npx prisma migrate reset --force
 npx prisma generate
-```
-
-### 5.Seed the Database
-
-```sh
+5. Seed Sample Data
+bash
+Copy code
 npm run seed
-```
-(or if running script directly)
-```sh
+# or
 npx tsx seed/seed.ts
-```
-
-### 6. Start the Backend Server
-```sh
+6. Start Server
+bash
+Copy code
 npm run dev
-```
-✅ Server will start at http://localhost:5000
+Backend runs at: http://localhost:5000
 
-
-
-
-### ✅ Here is the **Frontend Setup Section** in the same format:
-
-
-### 1. Navigate to Frontend Directory
-```sh
+💻 Frontend Setup
+1. Navigate to Frontend Directory
+bash
+Copy code
 cd ../frontend
-```
-
-### 2.Install Dependencies
-```sh
+2. Install Packages
+bash
+Copy code
 npm install
-```
-
-### 3. Start Frontend App
-```sh
+3. Run Application
+bash
+Copy code
 npm run dev
-```
+Frontend runs at: http://localhost:5173
 
-✅ App runs at: http://localhost:5173
+🧪 Testing Modules
+Banking Module
+Go to Banking section
 
-### How to Execute Tests
+Enter Ship ID and Year
 
-You can test different modules via the frontend dashboard or directly through backend APIs.
+View calculated CB and bank surplus CB for later use
 
-## 🧪 Functional Tests
+Pooling Module
+Open Pooling tab
 
-### 1. Banking
+Fetch yearly CB data for all ships
 
-- Navigate to the **Banking** tab.
-- Enter **Ship ID** and **Year**.
-- Click **Load CB** → View current Compliance Balance (CB) and adjustment preview.
-- Click **Bank** → Stores surplus CB into the banking ledger.
+Execute pooling operation to redistribute credits
 
----
+Observe adjusted CB values
 
-### 2. Pooling
+Database Check
+You can explore stored data using Prisma Studio:
 
-- Navigate to the **Pooling** tab.
-- Click **Fetch Adjusted CBs** → Loads all ships’ CB values for the selected year.
-- Click **Create & Allocate Pool** → Automatically redistributes surplus among deficit ships.
-- Verify results in the **CB After** column OR check backend logs.
-
----
-
-### 3. Database Verification
-
-You can visually verify all database records (routes, CB, banking, pools) using Prisma Studio:
-
-```sh
+bash
+Copy code
 npx prisma studio
-```
+🧭 Objective
+The goal of this project is to simplify FuelEU maritime compliance management by offering an accurate, automated, and data-driven approach to calculate and monitor GHG intensity, while supporting credit storage and redistribution features.
 
-### Screenshots & Sample Outputs
-1.Routes Tab
-<img width="1609" height="667" alt="image" src="https://github.com/user-attachments/assets/559af23a-ba7f-4006-8ad9-815863dc48d5" />
+🧱 Technology Stack
+Frontend: React + TypeScript + Vite
 
-2.Compare Tab
-<img width="1289" height="803" alt="image" src="https://github.com/user-attachments/assets/3d62d149-d531-4d45-8946-b400d80aa0bf" />
+Backend: Node.js + Express
 
-3.Banking Tab
-<img width="1286" height="517" alt="image" src="https://github.com/user-attachments/assets/fb876c5a-a888-43bd-95b6-f78f66912807" />
+Database: Neon PostgreSQL
 
-4.Pooling Tab
-<img width="1290" height="508" alt="image" src="https://github.com/user-attachments/assets/ab983f47-f367-4cfe-9fc6-c2088f46e96f" />
+ORM: Prisma
 
+Architecture: Hexagonal (Ports and Adapters)
 
+📜 License
+Released under the MIT License — free to use, modify, and distribute for educational or professional purposes.
 
-
-
-
-
+Author: Souvik Das
+GitHub: github.com/souvik001122
